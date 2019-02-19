@@ -27,16 +27,26 @@ public class ShortageFinderACL {
      * other stick to single schema per product. By manual adjustments of demand,
      * customer always specifies desired delivery schema
      * (increase amount in scheduled transport or organize extra transport at given time)
-     *
+     * <p>
      * TODO algorithm is finding wrong shortages, when more productions is planned in a single day
      */
     public static List<ShortageEntity> findShortages(LocalDate today, int daysAhead, CurrentStock stock,
                                                      List<ProductionEntity> productions, List<DemandEntity> demands) {
+//        List<ShortageEntity> oldImplementation = ShortageFinder.findShortages(today, daysAhead, stock, productions, demands);
+//
+//        if (RefactorToggles.FindShortagesNewModel.isActive()) {
         ShortageCalculator calculator = new ShortageCalculatorFactory(today, daysAhead, stock, new ProductionOutputProvider(productions), new CurrentDemandProvider(demands)).invoke();
+        List<ShortageEntity> newImplementation = calculator.findShortages();
 
-        List<ShortageEntity> shortages = calculator.findShortages();
+//            Diff diff = compare(newImplementation, oldImplementation);
+//            if (diff.any()) {
+//                logDiff(today, daysAhead, stock, productions, demands, diff);
+//            } else {
+//                logOk(today, daysAhead, stock, productions, demands);
+//            }
+//        }
 
-        return shortages;
+        return newImplementation;
     }
 
     private ShortageFinderACL() {

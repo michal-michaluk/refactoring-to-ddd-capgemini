@@ -9,7 +9,6 @@ import external.CurrentStock;
 import external.JiraService;
 import external.NotificationsService;
 import external.StockService;
-import tools.ShortageFinder;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -35,7 +34,7 @@ public class ShortagePredictionService {
 
         for (ProductionEntity production : products) {
             CurrentStock currentStock = stockService.getCurrentStock(production.getForm().getRefNo());
-            List<ShortageEntity> shortages = ShortageFinder.findShortages(
+            List<ShortageEntity> shortages = ShortageFinderACL.findShortages(
                     today, confShortagePredictionDaysAhead,
                     currentStock,
                     productionDao.findFromTime(production.getForm().getRefNo(), today.atStartOfDay()),
@@ -60,7 +59,7 @@ public class ShortagePredictionService {
     public void processDemandChanged(String productRefNo) {
         LocalDate today = LocalDate.now(clock);
         CurrentStock stock = stockService.getCurrentStock(productRefNo);
-        List<ShortageEntity> shortages = ShortageFinder.findShortages(
+        List<ShortageEntity> shortages = ShortageFinderACL.findShortages(
                 today, confShortagePredictionDaysAhead,
                 stock,
                 productionDao.findFromTime(productRefNo, today.atStartOfDay()),
@@ -85,7 +84,7 @@ public class ShortagePredictionService {
     public void processLocking(String productRefNo) {
         LocalDate today = LocalDate.now(clock);
         CurrentStock currentStock = stockService.getCurrentStock(productRefNo);
-        List<ShortageEntity> shortages = ShortageFinder.findShortages(
+        List<ShortageEntity> shortages = ShortageFinderACL.findShortages(
                 today, confShortagePredictionDaysAhead,
                 currentStock,
                 productionDao.findFromTime(productRefNo, today.atStartOfDay()),
@@ -109,7 +108,7 @@ public class ShortagePredictionService {
     public void processStockChanged(String productRefNo) {
         LocalDate today = LocalDate.now(clock);
         CurrentStock currentStock = stockService.getCurrentStock(productRefNo);
-        List<ShortageEntity> shortages = ShortageFinder.findShortages(
+        List<ShortageEntity> shortages = ShortageFinderACL.findShortages(
                 today, confShortagePredictionDaysAhead,
                 currentStock,
                 productionDao.findFromTime(productRefNo, today.atStartOfDay()),
