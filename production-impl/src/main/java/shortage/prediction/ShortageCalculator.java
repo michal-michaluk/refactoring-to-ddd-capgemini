@@ -10,8 +10,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ShortageCalculator {
-    private CurrentStock stock;
     private List<LocalDate> dates;
+
+    private CurrentStock stock;
     private ProductionOutput outputs;
     private CurrentDemands demandsPerDay;
 
