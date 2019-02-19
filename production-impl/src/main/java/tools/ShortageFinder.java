@@ -8,6 +8,7 @@ import external.CurrentStock;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,9 +45,10 @@ public class ShortageFinder {
                 .collect(toList());
 
         String productRefNo = null;
-        HashMap<LocalDate, ProductionEntity> outputs = new HashMap<>();
+        HashMap<LocalDate, List<ProductionEntity>> outputs = new HashMap<>();
         for (ProductionEntity production : productions) {
-            outputs.put(production.getStart().toLocalDate(), production);
+            outputs.computeIfAbsent(production.getStart().toLocalDate(), localDate -> new ArrayList<>())
+                    .add(production);
             productRefNo = production.getForm().getRefNo();
         }
         HashMap<LocalDate, DemandEntity> demandsPerDay = new HashMap<>();
@@ -60,15 +62,15 @@ public class ShortageFinder {
         for (LocalDate day : dates) {
             DemandEntity demand = demandsPerDay.get(day);
             if (demand == null) {
-                ProductionEntity production = outputs.get(day);
-                if (production != null) {
+                List<ProductionEntity> productionss = outputs.get(day);
+                for (ProductionEntity production : productionss) {
                     level += production.getOutput();
                 }
                 continue;
             }
             long produced = 0;
-            ProductionEntity production = outputs.get(day);
-            if (production != null) {
+            List<ProductionEntity> productionss = outputs.get(day);
+            for (ProductionEntity production : productionss) {
                 produced = production.getOutput();
             }
 
