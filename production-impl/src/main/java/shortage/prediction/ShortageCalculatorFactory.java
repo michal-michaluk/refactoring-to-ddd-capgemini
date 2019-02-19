@@ -1,7 +1,5 @@
 package shortage.prediction;
 
-import entities.DemandEntity;
-import entities.ProductionEntity;
 import external.CurrentStock;
 
 import java.time.LocalDate;
@@ -14,10 +12,10 @@ public class ShortageCalculatorFactory {
     private LocalDate today;
     private int daysAhead;
     private CurrentStock stock;
-    private List<ProductionEntity> productions;
-    private List<DemandEntity> demands;
+    private ProductionOutputProvider productions;
+    private DemandProvider demands;
 
-    public ShortageCalculatorFactory(LocalDate today, int daysAhead, CurrentStock stock, List<ProductionEntity> productions, List<DemandEntity> demands) {
+    public ShortageCalculatorFactory(LocalDate today, int daysAhead, CurrentStock stock, ProductionOutputProvider productions, DemandProvider demands) {
         this.today = today;
         this.daysAhead = daysAhead;
         this.stock = stock;
@@ -30,8 +28,9 @@ public class ShortageCalculatorFactory {
                 .limit(daysAhead)
                 .collect(toList());
 
-        ProductionOutput outputs = new ProductionOutput(productions);
-        CurrentDemands demandsPerDay = new CurrentDemands(demands);
+        ProductionOutput outputs = productions.createOutputs();
+        CurrentDemands demandsPerDay = demands.createDemands();
         return new ShortageCalculator(stock, dates, outputs, demandsPerDay);
     }
+
 }
