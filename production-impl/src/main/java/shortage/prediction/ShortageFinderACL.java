@@ -32,7 +32,7 @@ public class ShortageFinderACL {
      */
     public static List<ShortageEntity> findShortages(LocalDate today, int daysAhead, CurrentStock stock,
                                                      List<ProductionEntity> productions, List<DemandEntity> demands) {
-        ShortageCalculator calculator = new ShortageCalculatorFactory(today, daysAhead, stock, new ProductionOutputProvider(productions), new DemandProvider(demands)).invoke();
+        ShortageCalculator calculator = new ShortageCalculatorFactory(today, daysAhead, stock, new ProductionOutputProvider(productions), new CurrentDemandProvider(demands)).invoke();
 
         List<ShortageEntity> shortages = calculator.findShortages();
 

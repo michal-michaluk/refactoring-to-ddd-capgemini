@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class DemandProvider {
+public class CurrentDemandProvider {
     private List<DemandEntity> demands;
 
-    public DemandProvider(List<DemandEntity> demands) {
+    public CurrentDemandProvider(List<DemandEntity> demands) {
         this.demands = demands;
     }
 

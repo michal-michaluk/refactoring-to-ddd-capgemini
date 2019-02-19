@@ -13,9 +13,9 @@ public class ShortageCalculatorFactory {
     private int daysAhead;
     private CurrentStock stock;
     private ProductionOutputProvider productions;
-    private DemandProvider demands;
+    private CurrentDemandProvider demands;
 
-    public ShortageCalculatorFactory(LocalDate today, int daysAhead, CurrentStock stock, ProductionOutputProvider productions, DemandProvider demands) {
+    public ShortageCalculatorFactory(LocalDate today, int daysAhead, CurrentStock stock, ProductionOutputProvider productions, CurrentDemandProvider demands) {
         this.today = today;
         this.daysAhead = daysAhead;
         this.stock = stock;
