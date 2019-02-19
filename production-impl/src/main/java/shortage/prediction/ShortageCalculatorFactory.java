@@ -1,7 +1,9 @@
 package shortage.prediction;
 
 import external.CurrentStock;
+import external.StockService;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
@@ -9,28 +11,22 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 
 public class ShortageCalculatorFactory {
-    private LocalDate today;
     private int daysAhead;
-    private CurrentStock stock;
+    private StockService stockService;
     private ProductionOutputProvider productions;
     private CurrentDemandProvider demands;
+    private Clock clock;
 
-    public ShortageCalculatorFactory(LocalDate today, int daysAhead, CurrentStock stock, ProductionOutputProvider productions, CurrentDemandProvider demands) {
-        this.today = today;
-        this.daysAhead = daysAhead;
-        this.stock = stock;
-        this.productions = productions;
-        this.demands = demands;
-    }
+    public ShortageCalculator get(String refNo) {
+        LocalDate today = LocalDate.now(clock);
 
-    public ShortageCalculator invoke() {
         List<LocalDate> dates = Stream.iterate(today, date -> date.plusDays(1))
                 .limit(daysAhead)
                 .collect(toList());
 
-        ProductionOutput outputs = productions.createOutputs();
-        CurrentDemands demandsPerDay = demands.createDemands();
+        CurrentStock stock = stockService.getCurrentStock(refNo);
+        ProductionOutput outputs = productions.createOutputs(refNo, today.atStartOfDay());
+        CurrentDemands demandsPerDay = demands.createDemands(refNo, today.atStartOfDay());
         return new ShortageCalculator(stock, dates, outputs, demandsPerDay);
     }
-
 }

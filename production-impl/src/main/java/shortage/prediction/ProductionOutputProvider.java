@@ -1,19 +1,23 @@
 package shortage.prediction;
 
+import dao.ProductionDao;
 import entities.ProductionEntity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ProductionOutputProvider {
 
-    private List<ProductionEntity> productions;
+    private ProductionDao productionDao;
 
-    public ProductionOutputProvider(List<ProductionEntity> productions) {
-        this.productions = productions;
+    public ProductionOutputProvider(ProductionDao productionDao) {
+        this.productionDao = productionDao;
     }
 
-    public ProductionOutput createOutputs() {
+    public ProductionOutput createOutputs(String refNo, LocalDateTime fromTime) {
+        List<ProductionEntity> productions = productionDao.findFromTime(refNo, fromTime);
+
         return new ProductionOutput(
                 productions.stream()
                         .map(production -> production.getForm().getRefNo())

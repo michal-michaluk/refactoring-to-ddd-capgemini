@@ -1,7 +1,5 @@
 package shortage.prediction;
 
-import dao.DemandDao;
-import dao.ProductionDao;
 import dao.ShortageDao;
 import entities.ProductionEntity;
 import entities.ShortageEntity;
@@ -16,17 +14,14 @@ import java.util.List;
 
 public class ShortagePredictionService {
 
+    private ShortageCalculatorFactory factory;
     private ShortageDao shortageDao;
-    private ProductionDao productionDao;
     private StockService stockService;
-    private DemandDao demandDao;
-    private ShortagePredictionService shortagesPrediction;
 
     private NotificationsService notificationService;
     private JiraService jiraService;
     private Clock clock;
 
-    private int confShortagePredictionDaysAhead;
     private long confIncreaseQATaskPriorityInDays;
 
     public void processProductionPlanChanged(List<ProductionEntity> products) {
@@ -34,12 +29,10 @@ public class ShortagePredictionService {
 
         for (ProductionEntity production : products) {
             CurrentStock currentStock = stockService.getCurrentStock(production.getForm().getRefNo());
-            List<ShortageEntity> shortages = ShortageFinderACL.findShortages(
-                    today, confShortagePredictionDaysAhead,
-                    currentStock,
-                    productionDao.findFromTime(production.getForm().getRefNo(), today.atStartOfDay()),
-                    demandDao.findFrom(today.atStartOfDay(), production.getForm().getRefNo())
-            );
+
+            ShortageCalculator calculator = factory.get(production.getForm().getRefNo());
+            List<ShortageEntity> shortages = calculator.findShortages();
+
             List<ShortageEntity> previous = shortageDao.getForProduct(production.getForm().getRefNo());
             if (!shortages.isEmpty() && !shortages.equals(previous)) { // ShortagePredicted
                 notificationService.markOnPlan(shortages);
@@ -59,12 +52,9 @@ public class ShortagePredictionService {
     public void processDemandChanged(String productRefNo) {
         LocalDate today = LocalDate.now(clock);
         CurrentStock stock = stockService.getCurrentStock(productRefNo);
-        List<ShortageEntity> shortages = ShortageFinderACL.findShortages(
-                today, confShortagePredictionDaysAhead,
-                stock,
-                productionDao.findFromTime(productRefNo, today.atStartOfDay()),
-                demandDao.findFrom(today.atStartOfDay(), productRefNo)
-        );
+
+        ShortageCalculator calculator = factory.get(productRefNo);
+        List<ShortageEntity> shortages = calculator.findShortages();
 
         List<ShortageEntity> previous = shortageDao.getForProduct(productRefNo);
         if (!shortages.isEmpty() && !shortages.equals(previous)) {
@@ -84,12 +74,9 @@ public class ShortagePredictionService {
     public void processLocking(String productRefNo) {
         LocalDate today = LocalDate.now(clock);
         CurrentStock currentStock = stockService.getCurrentStock(productRefNo);
-        List<ShortageEntity> shortages = ShortageFinderACL.findShortages(
-                today, confShortagePredictionDaysAhead,
-                currentStock,
-                productionDao.findFromTime(productRefNo, today.atStartOfDay()),
-                demandDao.findFrom(today.atStartOfDay(), productRefNo)
-        );
+
+        ShortageCalculator calculator = factory.get(productRefNo);
+        List<ShortageEntity> shortages = calculator.findShortages();
 
         List<ShortageEntity> previous = shortageDao.getForProduct(productRefNo);
         if (!shortages.isEmpty() && !shortages.equals(previous)) {
@@ -108,12 +95,9 @@ public class ShortagePredictionService {
     public void processStockChanged(String productRefNo) {
         LocalDate today = LocalDate.now(clock);
         CurrentStock currentStock = stockService.getCurrentStock(productRefNo);
-        List<ShortageEntity> shortages = ShortageFinderACL.findShortages(
-                today, confShortagePredictionDaysAhead,
-                currentStock,
-                productionDao.findFromTime(productRefNo, today.atStartOfDay()),
-                demandDao.findFrom(today.atStartOfDay(), productRefNo)
-        );
+
+        ShortageCalculator calculator = factory.get(productRefNo);
+        List<ShortageEntity> shortages = calculator.findShortages();
 
         List<ShortageEntity> previous = shortageDao.getForProduct(productRefNo);
         if (shortages != null && !shortages.equals(previous)) {
